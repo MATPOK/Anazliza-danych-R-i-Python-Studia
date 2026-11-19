@@ -1,0 +1,40 @@
+services:
+  app:
+    build: .
+    image: nbp-waluty
+    container_name: nbp
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./nbp_dane.db:/app/nbp_dane.db
+    restart: unless-stopped
+
+  scheduler:
+    image: nbp-waluty
+    container_name: nbp-scheduler
+    volumes:
+      - ./nbp_dane.db:/app/nbp_dane.db
+    environment:
+      INTERWAL_SEKUND: "3600"
+      PYTHONUNBUFFERED: "1"
+    command:
+      - sh
+      - -c
+      - |
+        while true; do
+          echo "=== $$(date '+%Y-%m-%d %H:%M:%S') uruchamiam ETL ==="
+          python fetch_data.py || echo "ETL zakończony błędem - ponowna próba za $${INTERWAL_SEKUND} s"
+          sleep "$${INTERWAL_SEKUND}"
+        done
+    restart: unless-stopped
+    depends_on:
+      - app
+
+  etl:
+    image: nbp-waluty
+    volumes:
+      - ./nbp_dane.db:/app/nbp_dane.db
+    command: ["python", "fetch_data.py"]
+    profiles: ["etl"]   
+    depends_on:
+      - app
