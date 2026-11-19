@@ -4,10 +4,9 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-# 1. Ustawienia strony
+# Ustawienia strony
 st.set_page_config(
     page_title="Analiza Walut NBP",
-    page_icon="📈",
     layout="wide",
     initial_sidebar_state=420,
 )
@@ -15,7 +14,7 @@ st.title("Analiza Kursów Walut NBP")
 st.markdown("Made by Mateusz Pokrywka")
 
 
-# 2. Wczytanie danych
+# Wczytanie danych
 # Dane są trzymane w pamięci przez godzinę, żeby nie czytać bazy przy każdym kliknięciu
 @st.cache_data(ttl=3600)
 def wczytaj_dane():
@@ -37,8 +36,8 @@ najstarsza_data = dane['data'].min()
 najnowsza_data = dane['data'].max()
 
 
-# 3. Panel boczny - wybór walut
-st.sidebar.header("⚙️ Ustawienia Analizy")
+#  Panel boczny - wybór walut
+st.sidebar.header("Ustawienia Analizy")
 
 zakresy = dane.groupby('kod_waluty')['data'].agg(['min', 'max'])
 
@@ -71,7 +70,7 @@ if waluty_historyczne:
         wybrane += pokaz_waluty(waluty_historyczne)
 
 
-# 4. Panel boczny - zakres dat
+# Panel boczny - zakres dat
 st.sidebar.markdown("---")
 st.sidebar.subheader("Zakres czasu")
 
@@ -82,7 +81,7 @@ with kolumna_do:
     data_do = st.date_input("Do:", min_value=najstarsza_data, max_value=najnowsza_data, value=najnowsza_data)
 
 
-# 5. Filtrowanie
+# Filtrowanie
 filtr = (
     (dane['data'].dt.date >= data_od)
     & (dane['data'].dt.date <= data_do)
@@ -95,7 +94,7 @@ if wybrane_dane.empty:
     st.stop()
 
 
-# 6. Kafelki z ostatnim kursem
+# Kafelki z ostatnim kursem
 st.subheader("Bieżące statystyki dla wybranego okresu")
 
 kafelki = st.columns(len(wybrane))
@@ -119,7 +118,7 @@ for i, waluta in enumerate(wybrane):
 st.markdown("---")
 
 
-# 7. Wykres kursów
+# Wykres kursów
 st.subheader("Historia kształtowania się kursów")
 
 wykres = px.line(
@@ -134,10 +133,10 @@ wykres.update_layout(hovermode="x unified")
 st.plotly_chart(wykres, width="stretch")
 
 
-# 8. Statystyki
+# Statystyki
 st.subheader("Podsumowanie statystyczne")
 
-# Tabela: wiersze to dni, kolumny to waluty
+# Tabela
 tabela_kursow = wybrane_dane.pivot(index='data', columns='kod_waluty', values='kurs')
 
 pierwsze_kursy = tabela_kursow.apply(lambda kolumna: kolumna.dropna().iloc[0])
@@ -176,7 +175,7 @@ st.dataframe(
 st.markdown("---")
 
 
-# 9. Mapa korelacji
+# Mapa korelacji
 st.subheader("Zależności między walutami")
 
 if tabela_kursow.shape[1] < 2:
@@ -197,9 +196,7 @@ else:
     mapa.update_layout(height=max(400, 28 * len(korelacja)))
     st.plotly_chart(mapa, width="stretch")
     st.caption(
-        "Współczynnik korelacji Pearsona dziennych zmian kursów (od −1 do 1). "
-        "Bliski 1: waluty zmieniają się razem względem PLN; bliski 0: brak związku; "
-        "ujemny: zmieniają się w przeciwnych kierunkach. Puste pole: za mało wspólnych notowań."
+        "Współczynnik korelacji Pearsona dziennych zmian kursów (od -1 do 1). "
     )
 
 st.markdown("---")

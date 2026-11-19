@@ -22,7 +22,7 @@ services:
       - -c
       - |
         while true; do
-          echo "=== $$(date '+%Y-%m-%d %H:%M:%S') uruchamiam ETL ==="
+          echo "$$(date '+%Y-%m-%d %H:%M:%S') uruchamiam ETL"
           python fetch_data.py || echo "ETL zakończony błędem - ponowna próba za $${INTERWAL_SEKUND} s"
           sleep "$${INTERWAL_SEKUND}"
         done

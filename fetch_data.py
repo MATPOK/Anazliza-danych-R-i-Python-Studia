@@ -7,7 +7,7 @@ import requests
 DATA_POCZATKOWA = datetime.date(2002, 1, 2)
 
 
-# 1. Przygotowanie bazy
+# Przygotowanie bazy
 def stworz_baze():
     baza = sqlite3.connect('nbp_dane.db')
     baza.execute('''
@@ -22,7 +22,7 @@ def stworz_baze():
     return baza
 
 
-# 2. Jakie dni są już w bazie
+# Jakie dni są już w bazie
 def pobierz_zakres_dat(baza):
     najstarsza, najnowsza = baza.execute('SELECT MIN(data), MAX(data) FROM kursy').fetchone()
 
@@ -31,7 +31,7 @@ def pobierz_zakres_dat(baza):
     return datetime.date.fromisoformat(najstarsza), datetime.date.fromisoformat(najnowsza)
 
 
-# 3. Pobieranie kursów z API i zapis do bazy
+# Pobieranie kursów z API i zapis do bazy
 def pobierz_i_zapisz(baza, od_dnia, do_dnia):
     nowe_rekordy = 0
     poczatek = od_dnia
@@ -41,7 +41,7 @@ def pobierz_i_zapisz(baza, od_dnia, do_dnia):
         koniec = min(poczatek + datetime.timedelta(days=90), do_dnia)
         print(f"Pobieranie: {poczatek} -> {koniec}...")
 
-        adres = f"http://api.nbp.pl/api/exchangerates/tables/A/{poczatek}/{koniec}/?format=json"
+        adres = f"https://api.nbp.pl/api/exchangerates/tables/A/{poczatek}/{koniec}/?format=json"
         odpowiedz = requests.get(adres, timeout=30)
 
         if odpowiedz.status_code == 200:
@@ -63,7 +63,7 @@ def pobierz_i_zapisz(baza, od_dnia, do_dnia):
     print(f"\nZakończono. Dodano nowych rekordów do bazy: {nowe_rekordy}")
 
 
-# 4. Uruchomienie
+# Uruchomienie
 if __name__ == "__main__":
     baza = stworz_baze()
     najstarsza, najnowsza = pobierz_zakres_dat(baza)
